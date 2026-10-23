@@ -10,9 +10,21 @@ import {
   Inject,
   ServiceUnavailableException,
 } from "@nestjs/common";
+import {
+  ApiExtraModels,
+  ApiOkResponse,
+  ApiOperation,
+  ApiServiceUnavailableResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 import { PinoLogger } from "nestjs-pino";
 import { ENVIRONMENT } from "../infrastructure/config/config.module";
 import type { Environment } from "../infrastructure/config/environment";
+import {
+  ApiErrorSchema,
+  HealthLiveSchema,
+  HealthReadySchema,
+} from "../shared/http/openapi-schemas";
 
 const queueNames = [
   "wager-transactions.fifo",
@@ -21,6 +33,8 @@ const queueNames = [
 ];
 
 @Controller("health")
+@ApiTags("Health")
+@ApiExtraModels(ApiErrorSchema, HealthLiveSchema, HealthReadySchema)
 export class HealthController {
   constructor(
     @Inject(MikroORM) private readonly orm: MikroORM,
@@ -30,11 +44,41 @@ export class HealthController {
   ) {}
 
   @Get("live")
+  @ApiOperation({
+    summary: "Liveness probe",
+    description:
+      "Reports whether the process is alive; it does not depend on PostgreSQL or SQS.",
+  })
+  @ApiOkResponse({ description: "Process is alive", type: HealthLiveSchema })
   live() {
     return { status: "ok" };
   }
 
   @Get("ready")
+  @ApiOperation({
+    summary: "Readiness probe",
+    description: "Checks PostgreSQL and the configured SQS queues.",
+  })
+  @ApiOkResponse({
+    description: "Dependencies are ready",
+    type: HealthReadySchema,
+  })
+  @ApiServiceUnavailableResponse({
+    description: "PostgreSQL or SQS is unavailable",
+    schema: {
+      type: "object",
+      properties: {
+        status: { type: "string", example: "error" },
+        dependencies: {
+          type: "object",
+          properties: {
+            postgres: { type: "string", enum: ["up", "down"] },
+            sqs: { type: "string", enum: ["up", "down"] },
+          },
+        },
+      },
+    },
+  })
   async ready() {
     const results = await Promise.allSettled([
       this.orm.em.getConnection().execute("select 1"),

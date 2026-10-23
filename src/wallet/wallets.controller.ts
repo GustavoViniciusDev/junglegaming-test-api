@@ -15,6 +15,22 @@ import {
   UseFilters,
 } from "@nestjs/common";
 import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiExtraModels,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiServiceUnavailableResponse,
+  ApiTags,
+  getSchemaPath,
+} from "@nestjs/swagger";
+import {
   CreateWallet,
   isCreateWalletInput,
   isInvalidWalletInputError,
@@ -25,6 +41,14 @@ import { ReadWallet, ReadWalletLedger } from "./application/read-wallet";
 import { ReadHttpExceptionFilter } from "../shared/http/read-http-exception.filter";
 import type { Wallet } from "./domain/wallet";
 import type { WalletLedgerEntry } from "./domain/wallet-ledger-entry";
+import {
+  ApiErrorSchema,
+  WalletCreateRequestSchema,
+  WalletCreateResponseSchema,
+  WalletLedgerEntrySchema,
+  WalletLedgerPageSchema,
+  WalletResponseSchema,
+} from "../shared/http/openapi-schemas";
 
 function walletToResponse(wallet: Wallet) {
   return {
@@ -52,6 +76,14 @@ function ledgerEntryToResponse(entry: WalletLedgerEntry) {
 }
 
 @Controller("wallets")
+@ApiExtraModels(
+  ApiErrorSchema,
+  WalletCreateRequestSchema,
+  WalletCreateResponseSchema,
+  WalletLedgerEntrySchema,
+  WalletLedgerPageSchema,
+  WalletResponseSchema,
+)
 export class WalletsController {
   constructor(
     @Inject(CreateWallet) private readonly createWallet: CreateWallet,
@@ -61,12 +93,75 @@ export class WalletsController {
   ) {}
 
   @Get(":walletId")
+  @ApiTags("Wallets")
+  @ApiOperation({
+    summary: "Get a wallet",
+    description:
+      "Returns the persisted wallet balance as decimal-string money.",
+  })
+  @ApiParam({ name: "walletId", type: String })
+  @ApiOkResponse({ description: "Wallet found", type: WalletResponseSchema })
+  @ApiBadRequestResponse({
+    description: "Wallet ID is invalid",
+    schema: { $ref: getSchemaPath(ApiErrorSchema) },
+  })
+  @ApiNotFoundResponse({
+    description: "Wallet not found",
+    schema: { $ref: getSchemaPath(ApiErrorSchema) },
+  })
+  @ApiServiceUnavailableResponse({
+    description: "A required dependency is temporarily unavailable",
+    schema: { $ref: getSchemaPath(ApiErrorSchema) },
+  })
+  @ApiResponse({
+    status: 500,
+    description: "Unexpected server error",
+    schema: { $ref: getSchemaPath(ApiErrorSchema) },
+  })
   @UseFilters(ReadHttpExceptionFilter)
   async get(@Param("walletId") walletId: string) {
     return walletToResponse(await this.readWallet.execute(walletId));
   }
 
   @Get(":walletId/ledger")
+  @ApiTags("Ledger")
+  @ApiOperation({
+    summary: "List wallet ledger entries",
+    description:
+      "Uses stable keyset pagination ordered by createdAt DESC, id DESC. The cursor is opaque and scoped to the wallet.",
+  })
+  @ApiParam({ name: "walletId", type: String })
+  @ApiQuery({
+    name: "cursor",
+    required: false,
+    type: String,
+    description: "Opaque cursor returned as nextCursor by the previous page.",
+  })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    type: Number,
+    description: "Page size, default 50, maximum 100.",
+    example: 50,
+  })
+  @ApiOkResponse({ description: "Ledger page", type: WalletLedgerPageSchema })
+  @ApiBadRequestResponse({
+    description: "Invalid cursor or limit",
+    schema: { $ref: getSchemaPath(ApiErrorSchema) },
+  })
+  @ApiNotFoundResponse({
+    description: "Wallet not found",
+    schema: { $ref: getSchemaPath(ApiErrorSchema) },
+  })
+  @ApiServiceUnavailableResponse({
+    description: "A required dependency is temporarily unavailable",
+    schema: { $ref: getSchemaPath(ApiErrorSchema) },
+  })
+  @ApiResponse({
+    status: 500,
+    description: "Unexpected server error",
+    schema: { $ref: getSchemaPath(ApiErrorSchema) },
+  })
   @UseFilters(ReadHttpExceptionFilter)
   async getLedger(
     @Param("walletId") walletId: string,
@@ -85,7 +180,55 @@ export class WalletsController {
   }
 
   @Post()
+  @ApiTags("Wallets")
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: "Create a wallet",
+    description:
+      "A positive initial balance creates an internal OPENING transaction, a CREDIT ledger entry and opening events atomically. Zero creates only the wallet.",
+  })
+  @ApiBody({
+    type: WalletCreateRequestSchema,
+    examples: {
+      positiveOpening: {
+        summary: "Create a wallet with an opening balance",
+        value: {
+          playerId: "player-001",
+          currency: "BRL",
+          initialBalance: "100.00",
+        },
+      },
+      zeroBalance: {
+        summary: "Create an empty wallet",
+        value: {
+          playerId: "player-002",
+          currency: "BRL",
+          initialBalance: "0.00",
+        },
+      },
+    },
+  })
+  @ApiCreatedResponse({
+    description: "Wallet created",
+    type: WalletCreateResponseSchema,
+  })
+  @ApiBadRequestResponse({
+    description: "Invalid wallet request or monetary string",
+    schema: { $ref: getSchemaPath(ApiErrorSchema) },
+  })
+  @ApiConflictResponse({
+    description: "A wallet already exists for this player and currency",
+    schema: { $ref: getSchemaPath(ApiErrorSchema) },
+  })
+  @ApiServiceUnavailableResponse({
+    description: "A recognized transient infrastructure failure",
+    schema: { $ref: getSchemaPath(ApiErrorSchema) },
+  })
+  @ApiResponse({
+    status: 500,
+    description: "Unexpected server error",
+    schema: { $ref: getSchemaPath(ApiErrorSchema) },
+  })
   async create(@Body() body: unknown) {
     if (!isCreateWalletInput(body)) {
       throw new BadRequestException("Wallet request payload is invalid");

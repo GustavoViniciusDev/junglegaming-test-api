@@ -103,6 +103,10 @@ A fila de transações tem redrive para `wager-transactions-dlq.fifo`; o limite 
 | `GET /health/ready` | Verifica PostgreSQL e as filas SQS configuradas. |
 | `GET /metrics` | Endpoint de exposição em texto do Prometheus. |
 
+### Swagger / OpenAPI
+
+A documentação interativa está disponível em `http://localhost:3000/docs` e o documento OpenAPI em `http://localhost:3000/docs-json`. Para importar as rotas no Bruno, use **Import → OpenAPI** e informe `http://localhost:3000/docs-json`. A documentação pode ser habilitada ou desabilitada por `SWAGGER_ENABLED` (padrão: `true`). Zod continua validando as requests em runtime; Swagger/OpenAPI documenta o contrato HTTP e não substitui essa validação.
+
 ### Criar uma Wallet
 
 ```sh
@@ -172,7 +176,7 @@ bun run build
 - `bun run test:distributed` inicia processos Bun independentes para cenários de concorrência, crash, restart e falha de conexão.
 - `bun run test:load` executa um benchmark HTTP local separado, usando um banco PostgreSQL temporário e validando a correção Wallet/Ledger após cada workload. Ele não faz parte de `bun test`.
 
-Evidências observadas: `bun test` teve 405 aprovados e 65 testes condicionados à infraestrutura ignorados no modo unitário isolado; integração teve 63 aprovados; distribuídos, 19 cenários; load, 3 workloads. A execução mais recente do acceptance runner agregou regressões, auditorias adversariais e auditorias estáticas em 493/493 verificações, sem falhas e com 2 warnings agregados. O total é agregado pelo runner, não representa 493 novos testes de acceptance. Duas execuções consecutivas anteriores à adição dos testes finais de auth extension e rejected replay registraram 491/491 cada; a execução posterior às adições registrou 493/493. Esses números descrevem execuções observadas e podem mudar conforme os testes evoluam.
+Evidências observadas: `bun test` teve 406 aprovados e 65 testes condicionados à infraestrutura ignorados no modo unitário isolado; integração teve 63 aprovados; distribuídos, 19 cenários; load, 3 workloads. A execução mais recente do acceptance runner agregou regressões, auditorias adversariais e auditorias estáticas em 493/493 verificações, sem falhas e com 2 warnings agregados. O total é agregado pelo runner, não representa 493 novos testes de acceptance. Duas execuções consecutivas anteriores à adição dos testes finais de auth extension e rejected replay registraram 491/491 cada; a execução posterior às adições registrou 493/493. Esses números descrevem execuções observadas e podem mudar conforme os testes evoluam.
 
 O script de load test executa um warm-up separado e informa percentis de latência HTTP de ponta a ponta. Em uma execução local observada, o publicador da Outbox ficou habilitado e drenou a fila até lag zero. Os resultados caracterizam o ambiente local, não representam uma promessa de capacidade de produção; consulte [ARCHITECTURE.md](ARCHITECTURE.md#caracterizacao-do-load-test) para ver a execução e suas limitações.
 

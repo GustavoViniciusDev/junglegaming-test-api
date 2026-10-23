@@ -1,0 +1,1234 @@
+{
+  "namespaces": ["public"],
+  "name": "public",
+  "tables": [
+    {
+      "columns": {
+        "message_id": {
+          "name": "message_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "consumer_name": {
+          "name": "consumer_name",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "payload_hash": {
+          "name": "payload_hash",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "received_at": {
+          "name": "received_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "processed_at": {
+          "name": "processed_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        }
+      },
+      "name": "inbox_messages",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": ["consumer_name", "message_id"],
+          "composite": true,
+          "constraint": false,
+          "keyName": "inbox_messages_pkey",
+          "unique": true,
+          "primary": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "inbox_messages_ids_nonempty",
+          "columnName": "message_id",
+          "definition": "CHECK (((length(btrim(message_id)) > 0) AND (length(btrim(consumer_name)) > 0) AND (length(btrim(payload_hash)) > 0)))",
+          "expression": "(length(btrim(message_id)) > 0) AND (length(btrim(consumer_name)) > 0) AND (length(btrim(payload_hash)) > 0)"
+        },
+        {
+          "name": "inbox_messages_timestamps_ordered",
+          "columnName": "received_at",
+          "definition": "CHECK (((processed_at IS NULL) OR (processed_at >= received_at)))",
+          "expression": "(processed_at IS NULL) OR (processed_at >= received_at)"
+        }
+      ],
+      "foreignKeys": {},
+      "nativeEnums": {},
+      "comment": null
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "aggregate_id": {
+          "name": "aggregate_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "payload": {
+          "name": "payload",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
+        },
+        "occurred_at": {
+          "name": "occurred_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "attempts": {
+          "name": "attempts",
+          "type": "int4",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": 32,
+          "scale": 0,
+          "default": "0",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "next_attempt_at": {
+          "name": "next_attempt_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "published_at": {
+          "name": "published_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        }
+      },
+      "name": "outbox_messages",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "outbox_messages_pkey",
+          "unique": true,
+          "primary": true
+        },
+        {
+          "columnNames": ["next_attempt_at", "id"],
+          "composite": true,
+          "constraint": false,
+          "keyName": "outbox_messages_retry_due_idx",
+          "unique": false,
+          "primary": false,
+          "expression": "CREATE INDEX outbox_messages_retry_due_idx ON public.outbox_messages USING btree (next_attempt_at, id) WHERE (published_at IS NULL)"
+        },
+        {
+          "columnNames": ["occurred_at", "id"],
+          "composite": true,
+          "constraint": false,
+          "keyName": "outbox_messages_unpublished_age_idx",
+          "unique": false,
+          "primary": false,
+          "expression": "CREATE INDEX outbox_messages_unpublished_age_idx ON public.outbox_messages USING btree (occurred_at, id) WHERE (published_at IS NULL)"
+        }
+      ],
+      "checks": [
+        {
+          "name": "outbox_messages_attempts_nonnegative",
+          "columnName": "attempts",
+          "definition": "CHECK ((attempts >= 0))",
+          "expression": "attempts >= 0"
+        },
+        {
+          "name": "outbox_messages_ids_nonempty",
+          "columnName": "id",
+          "definition": "CHECK (((length(btrim(id)) > 0) AND (length(btrim(aggregate_id)) > 0) AND (length(btrim(event_type)) > 0)))",
+          "expression": "(length(btrim(id)) > 0) AND (length(btrim(aggregate_id)) > 0) AND (length(btrim(event_type)) > 0)"
+        },
+        {
+          "name": "outbox_messages_timestamps_ordered",
+          "columnName": "occurred_at",
+          "definition": "CHECK (((published_at IS NULL) OR (published_at >= occurred_at)))",
+          "expression": "(published_at IS NULL) OR (published_at >= occurred_at)"
+        }
+      ],
+      "foreignKeys": {},
+      "nativeEnums": {},
+      "comment": null
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": true,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "provider_id": {
+          "name": "provider_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": true,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "external_transaction_id": {
+          "name": "external_transaction_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "idempotency_key": {
+          "name": "idempotency_key",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "payload_hash": {
+          "name": "payload_hash",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "wallet_id": {
+          "name": "wallet_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "round_id": {
+          "name": "round_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "game_id": {
+          "name": "game_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": ["OPENING", "BET", "WIN", "LOSS", "REFUND", "ROLLBACK"],
+          "mappedType": "enum"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [
+            "PENDING",
+            "PENDING_REFERENCE",
+            "PROCESSED",
+            "REJECTED",
+            "FAILED"
+          ],
+          "mappedType": "enum"
+        },
+        "amount": {
+          "name": "amount",
+          "type": "numeric(20,2)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": 20,
+          "scale": 2,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "decimal"
+        },
+        "resulting_balance": {
+          "name": "resulting_balance",
+          "type": "numeric(20,2)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": 20,
+          "scale": 2,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "decimal"
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "reference_external_transaction_id": {
+          "name": "reference_external_transaction_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "reference_transaction_id": {
+          "name": "reference_transaction_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": true,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "failure_code": {
+          "name": "failure_code",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "processed_at": {
+          "name": "processed_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "reference_retry_attempts": {
+          "name": "reference_retry_attempts",
+          "type": "int4",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": 32,
+          "scale": 0,
+          "default": "0",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "reference_next_attempt_at": {
+          "name": "reference_next_attempt_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        }
+      },
+      "name": "wager_transactions",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": ["id", "wallet_id", "currency"],
+          "composite": true,
+          "constraint": true,
+          "keyName": "wager_transactions_id_wallet_currency_unique",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "columnNames": ["idempotency_key"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "wager_transactions_idempotency_key_unique",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "wager_transactions_pkey",
+          "unique": true,
+          "primary": true
+        },
+        {
+          "columnNames": ["reference_transaction_id", "kind"],
+          "composite": true,
+          "constraint": false,
+          "keyName": "wager_transactions_processed_reversal_unique",
+          "unique": true,
+          "primary": false,
+          "expression": "CREATE UNIQUE INDEX wager_transactions_processed_reversal_unique ON public.wager_transactions USING btree (reference_transaction_id, kind) WHERE ((status = 'PROCESSED'::text) AND (kind = ANY (ARRAY['REFUND'::text, 'ROLLBACK'::text])) AND (reference_transaction_id IS NOT NULL))"
+        },
+        {
+          "columnNames": ["provider_id", "external_transaction_id"],
+          "composite": true,
+          "constraint": true,
+          "keyName": "wager_transactions_provider_external_unique",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "columnNames": ["reference_next_attempt_at", "created_at", "id"],
+          "composite": true,
+          "constraint": false,
+          "keyName": "wager_transactions_reference_retry_due_idx",
+          "unique": false,
+          "primary": false,
+          "expression": "CREATE INDEX wager_transactions_reference_retry_due_idx ON public.wager_transactions USING btree (reference_next_attempt_at, created_at, id) WHERE (status = 'PENDING_REFERENCE'::text)"
+        }
+      ],
+      "checks": [
+        {
+          "name": "wager_transactions_amount_nonnegative",
+          "columnName": "amount",
+          "definition": "CHECK ((amount >= (0)::numeric))",
+          "expression": "amount >= 0"
+        },
+        {
+          "name": "wager_transactions_currency_format",
+          "columnName": "currency",
+          "definition": "CHECK ((currency ~ '^[A-Z]{3}$'::text))",
+          "expression": "currency ~ '^[A-Z]{3}$'::text"
+        },
+        {
+          "name": "wager_transactions_ids_nonempty",
+          "columnName": "wallet_id",
+          "definition": "CHECK (((length(btrim(id)) > 0) AND (length(btrim(idempotency_key)) > 0) AND (length(btrim(payload_hash)) > 0) AND (length(btrim(wallet_id)) > 0) AND (length(btrim(player_id)) > 0)))",
+          "expression": "(length(btrim(id)) > 0) AND (length(btrim(idempotency_key)) > 0) AND (length(btrim(payload_hash)) > 0) AND (length(btrim(wallet_id)) > 0) AND (length(btrim(player_id)) > 0)"
+        },
+        {
+          "name": "wager_transactions_metadata",
+          "columnName": "round_id",
+          "definition": "CHECK ((((kind = 'OPENING'::text) AND (provider_id IS NULL) AND (external_transaction_id IS NULL) AND (round_id IS NULL) AND (game_id IS NULL)) OR ((kind <> 'OPENING'::text) AND (provider_id IS NOT NULL) AND (external_transaction_id IS NOT NULL) AND (round_id IS NOT NULL) AND (game_id IS NOT NULL) AND (length(btrim(provider_id)) > 0) AND (length(btrim(external_transaction_id)) > 0) AND (length(btrim(round_id)) > 0) AND (length(btrim(game_id)) > 0))))",
+          "expression": "((kind = 'OPENING'::text) AND (provider_id IS NULL) AND (external_transaction_id IS NULL) AND (round_id IS NULL) AND (game_id IS NULL)) OR ((kind <> 'OPENING'::text) AND (provider_id IS NOT NULL) AND (external_transaction_id IS NOT NULL) AND (round_id IS NOT NULL) AND (game_id IS NOT NULL) AND (length(btrim(provider_id)) > 0) AND (length(btrim(external_transaction_id)) > 0) AND (length(btrim(round_id)) > 0) AND (length(btrim(game_id)) > 0))"
+        },
+        {
+          "name": "wager_transactions_pending_reference",
+          "columnName": "reference_external_transaction_id",
+          "definition": "CHECK (((status <> 'PENDING_REFERENCE'::text) OR (reference_external_transaction_id IS NOT NULL)))",
+          "expression": "(status <> 'PENDING_REFERENCE'::text) OR (reference_external_transaction_id IS NOT NULL)"
+        },
+        {
+          "name": "wager_transactions_reference",
+          "columnName": "reference_external_transaction_id",
+          "definition": "CHECK ((((reference_external_transaction_id IS NULL) OR ((kind = ANY (ARRAY['WIN'::text, 'REFUND'::text, 'ROLLBACK'::text])) AND (length(btrim(reference_external_transaction_id)) > 0))) AND ((kind <> ALL (ARRAY['REFUND'::text, 'ROLLBACK'::text])) OR (reference_external_transaction_id IS NOT NULL)) AND ((reference_transaction_id IS NULL) OR (reference_external_transaction_id IS NOT NULL))))",
+          "expression": "((reference_external_transaction_id IS NULL) OR ((kind = ANY (ARRAY['WIN'::text, 'REFUND'::text, 'ROLLBACK'::text])) AND (length(btrim(reference_external_transaction_id)) > 0))) AND ((kind <> ALL (ARRAY['REFUND'::text, 'ROLLBACK'::text])) OR (reference_external_transaction_id IS NOT NULL)) AND ((reference_transaction_id IS NULL) OR (reference_external_transaction_id IS NOT NULL))"
+        },
+        {
+          "name": "wager_transactions_reference_retry_attempts_nonnegative",
+          "columnName": "reference_retry_attempts",
+          "definition": "CHECK ((reference_retry_attempts >= 0))",
+          "expression": "reference_retry_attempts >= 0"
+        },
+        {
+          "name": "wager_transactions_reference_retry_schedule",
+          "columnName": "reference_next_attempt_at",
+          "definition": "CHECK ((((status = 'PENDING_REFERENCE'::text) AND (reference_next_attempt_at IS NOT NULL)) OR ((status <> 'PENDING_REFERENCE'::text) AND (reference_next_attempt_at IS NULL))))",
+          "expression": "((status = 'PENDING_REFERENCE'::text) AND (reference_next_attempt_at IS NOT NULL)) OR ((status <> 'PENDING_REFERENCE'::text) AND (reference_next_attempt_at IS NULL))"
+        },
+        {
+          "name": "wager_transactions_resulting_balance_nonnegative",
+          "columnName": "resulting_balance",
+          "definition": "CHECK (((resulting_balance IS NULL) OR (resulting_balance >= (0)::numeric)))",
+          "expression": "resulting_balance IS NULL) OR (resulting_balance >= (0)"
+        },
+        {
+          "name": "wager_transactions_status_fields",
+          "columnName": "resulting_balance",
+          "definition": "CHECK ((((status = ANY (ARRAY['PENDING'::text, 'PENDING_REFERENCE'::text])) AND (processed_at IS NULL) AND (failure_code IS NULL) AND (resulting_balance IS NULL)) OR ((status = 'PROCESSED'::text) AND (processed_at IS NOT NULL) AND (failure_code IS NULL) AND (resulting_balance IS NOT NULL)) OR ((status = 'REJECTED'::text) AND (processed_at IS NOT NULL) AND (failure_code IS NOT NULL) AND (resulting_balance IS NULL) AND (failure_code = ANY (ARRAY['INSUFFICIENT_FUNDS'::text, 'REVERSAL_WOULD_CAUSE_NEGATIVE_BALANCE'::text, 'REFERENCE_NOT_FOUND'::text, 'INVALID_REFERENCE_KIND'::text, 'REFERENCE_PROVIDER_MISMATCH'::text, 'REFERENCE_PLAYER_MISMATCH'::text, 'REFERENCE_WALLET_MISMATCH'::text, 'REFERENCE_CURRENCY_MISMATCH'::text, 'REFERENCE_ROUND_MISMATCH'::text, 'REFERENCE_AMOUNT_MISMATCH'::text, 'REFERENCE_NOT_PROCESSED'::text, 'ALREADY_REFUNDED'::text, 'ALREADY_ROLLED_BACK'::text]))) OR ((status = 'FAILED'::text) AND (processed_at IS NOT NULL) AND (failure_code IS NOT NULL) AND (resulting_balance IS NULL) AND (failure_code = 'PERMANENT_PROCESSING_ERROR'::text))))",
+          "expression": "((status = ANY (ARRAY['PENDING'::text, 'PENDING_REFERENCE'::text])) AND (processed_at IS NULL) AND (failure_code IS NULL) AND (resulting_balance IS NULL)) OR ((status = 'PROCESSED'::text) AND (processed_at IS NOT NULL) AND (failure_code IS NULL) AND (resulting_balance IS NOT NULL)) OR ((status = 'REJECTED'::text) AND (processed_at IS NOT NULL) AND (failure_code IS NOT NULL) AND (resulting_balance IS NULL) AND (failure_code = ANY (ARRAY['INSUFFICIENT_FUNDS'::text, 'REVERSAL_WOULD_CAUSE_NEGATIVE_BALANCE'::text, 'REFERENCE_NOT_FOUND'::text, 'INVALID_REFERENCE_KIND'::text, 'REFERENCE_PROVIDER_MISMATCH'::text, 'REFERENCE_PLAYER_MISMATCH'::text, 'REFERENCE_WALLET_MISMATCH'::text, 'REFERENCE_CURRENCY_MISMATCH'::text, 'REFERENCE_ROUND_MISMATCH'::text, 'REFERENCE_AMOUNT_MISMATCH'::text, 'REFERENCE_NOT_PROCESSED'::text, 'ALREADY_REFUNDED'::text, 'ALREADY_ROLLED_BACK'::text]))) OR ((status = 'FAILED'::text) AND (processed_at IS NOT NULL) AND (failure_code IS NOT NULL) AND (resulting_balance IS NULL) AND (failure_code = 'PERMANENT_PROCESSING_ERROR'::text))"
+        },
+        {
+          "name": "wager_transactions_timestamps_ordered",
+          "columnName": "created_at",
+          "definition": "CHECK (((updated_at >= created_at) AND ((processed_at IS NULL) OR (processed_at = updated_at))))",
+          "expression": "(updated_at >= created_at) AND ((processed_at IS NULL) OR (processed_at = updated_at))"
+        }
+      ],
+      "foreignKeys": {
+        "wager_transactions_reference_transaction_id_fkey": {
+          "columnNames": ["reference_transaction_id"],
+          "constraintName": "wager_transactions_reference_transaction_id_fkey",
+          "localTableName": "public.wager_transactions",
+          "referencedTableName": "public.wager_transactions",
+          "referencedColumnNames": ["id"],
+          "updateRule": "no action",
+          "deleteRule": "restrict"
+        },
+        "wager_transactions_wallet_identity_fk": {
+          "columnNames": ["wallet_id", "player_id", "currency"],
+          "constraintName": "wager_transactions_wallet_identity_fk",
+          "localTableName": "public.wager_transactions",
+          "referencedTableName": "public.wallets",
+          "referencedColumnNames": ["id", "player_id", "currency"],
+          "updateRule": "no action",
+          "deleteRule": "restrict"
+        }
+      },
+      "nativeEnums": {},
+      "comment": null
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "wallet_id": {
+          "name": "wallet_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "transaction_id": {
+          "name": "transaction_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "direction": {
+          "name": "direction",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": ["CREDIT", "DEBIT"],
+          "mappedType": "enum"
+        },
+        "amount": {
+          "name": "amount",
+          "type": "numeric(20,2)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": 20,
+          "scale": 2,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "decimal"
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "balance_before": {
+          "name": "balance_before",
+          "type": "numeric(20,2)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": 20,
+          "scale": 2,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "decimal"
+        },
+        "balance_after": {
+          "name": "balance_after",
+          "type": "numeric(20,2)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": 20,
+          "scale": 2,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "decimal"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        }
+      },
+      "name": "wallet_ledger_entries",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "wallet_ledger_entries_pkey",
+          "unique": true,
+          "primary": true
+        },
+        {
+          "columnNames": ["transaction_id", "wallet_id"],
+          "composite": true,
+          "constraint": true,
+          "keyName": "wallet_ledger_entries_transaction_wallet_unique",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "columnNames": ["wallet_id", "created_at", "id"],
+          "composite": true,
+          "constraint": false,
+          "keyName": "wallet_ledger_entries_wallet_created_id_idx",
+          "unique": false,
+          "primary": false
+        }
+      ],
+      "checks": [
+        {
+          "name": "wallet_ledger_entries_amount_positive",
+          "columnName": "amount",
+          "definition": "CHECK ((amount > (0)::numeric))",
+          "expression": "amount > 0"
+        },
+        {
+          "name": "wallet_ledger_entries_arithmetic",
+          "columnName": "balance_after",
+          "definition": "CHECK ((((direction = 'CREDIT'::text) AND (balance_after = (balance_before + amount))) OR ((direction = 'DEBIT'::text) AND (balance_after = (balance_before - amount)))))",
+          "expression": "((direction = 'CREDIT'::text) AND (balance_after = (balance_before + amount))) OR ((direction = 'DEBIT'::text) AND (balance_after = (balance_before - amount)))"
+        },
+        {
+          "name": "wallet_ledger_entries_balances_nonnegative",
+          "columnName": "balance_after",
+          "definition": "CHECK (((balance_before >= (0)::numeric) AND (balance_after >= (0)::numeric)))",
+          "expression": "balance_before >= (0) AND balance_after >= (0)"
+        },
+        {
+          "name": "wallet_ledger_entries_currency_format",
+          "columnName": "currency",
+          "definition": "CHECK ((currency ~ '^[A-Z]{3}$'::text))",
+          "expression": "currency ~ '^[A-Z]{3}$'::text"
+        },
+        {
+          "name": "wallet_ledger_entries_id_nonempty",
+          "columnName": "id",
+          "definition": "CHECK ((length(btrim(id)) > 0))",
+          "expression": "length(btrim(id)) > 0"
+        }
+      ],
+      "foreignKeys": {
+        "wallet_ledger_entries_transaction_wallet_currency_fk": {
+          "columnNames": ["transaction_id", "wallet_id", "currency"],
+          "constraintName": "wallet_ledger_entries_transaction_wallet_currency_fk",
+          "localTableName": "public.wallet_ledger_entries",
+          "referencedTableName": "public.wager_transactions",
+          "referencedColumnNames": ["id", "wallet_id", "currency"],
+          "updateRule": "no action",
+          "deleteRule": "restrict"
+        },
+        "wallet_ledger_entries_wallet_currency_fk": {
+          "columnNames": ["wallet_id", "currency"],
+          "constraintName": "wallet_ledger_entries_wallet_currency_fk",
+          "localTableName": "public.wallet_ledger_entries",
+          "referencedTableName": "public.wallets",
+          "referencedColumnNames": ["id", "currency"],
+          "updateRule": "no action",
+          "deleteRule": "restrict"
+        }
+      },
+      "nativeEnums": {},
+      "comment": null
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": true,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "player_id": {
+          "name": "player_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "currency": {
+          "name": "currency",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "balance": {
+          "name": "balance",
+          "type": "numeric(20,2)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": 20,
+          "scale": 2,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "decimal"
+        },
+        "version": {
+          "name": "version",
+          "type": "int8",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": 64,
+          "scale": 0,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "bigint"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        }
+      },
+      "name": "wallets",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": ["id", "currency"],
+          "composite": true,
+          "constraint": true,
+          "keyName": "wallets_id_currency_unique",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "columnNames": ["id", "player_id", "currency"],
+          "composite": true,
+          "constraint": true,
+          "keyName": "wallets_id_player_currency_unique",
+          "unique": true,
+          "primary": false
+        },
+        {
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "wallets_pkey",
+          "unique": true,
+          "primary": true
+        },
+        {
+          "columnNames": ["player_id", "currency"],
+          "composite": true,
+          "constraint": true,
+          "keyName": "wallets_player_currency_unique",
+          "unique": true,
+          "primary": false
+        }
+      ],
+      "checks": [
+        {
+          "name": "wallets_balance_nonnegative",
+          "columnName": "balance",
+          "definition": "CHECK ((balance >= (0)::numeric))",
+          "expression": "balance >= 0"
+        },
+        {
+          "name": "wallets_currency_format",
+          "columnName": "currency",
+          "definition": "CHECK ((currency ~ '^[A-Z]{3}$'::text))",
+          "expression": "currency ~ '^[A-Z]{3}$'::text"
+        },
+        {
+          "name": "wallets_id_nonempty",
+          "columnName": "id",
+          "definition": "CHECK ((length(btrim(id)) > 0))",
+          "expression": "length(btrim(id)) > 0"
+        },
+        {
+          "name": "wallets_player_id_nonempty",
+          "columnName": "player_id",
+          "definition": "CHECK ((length(btrim(player_id)) > 0))",
+          "expression": "length(btrim(player_id)) > 0"
+        },
+        {
+          "name": "wallets_timestamps_ordered",
+          "columnName": "updated_at",
+          "definition": "CHECK ((updated_at >= created_at))",
+          "expression": "updated_at >= created_at"
+        },
+        {
+          "name": "wallets_version_valid",
+          "columnName": "version",
+          "definition": "CHECK (((version >= 1) AND (version <= '9007199254740991'::bigint)))",
+          "expression": "(version >= 1) AND (version <= '9007199254740991'::bigint)"
+        }
+      ],
+      "foreignKeys": {},
+      "nativeEnums": {},
+      "comment": null
+    }
+  ],
+  "nativeEnums": {}
+}

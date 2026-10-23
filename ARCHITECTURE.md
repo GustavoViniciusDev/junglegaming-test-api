@@ -32,6 +32,8 @@ test/               Harnesses unitários, integração PostgreSQL/LocalStack, di
 docker/             Provisionamento de filas do LocalStack
 ```
 
+Na camada HTTP, Swagger/OpenAPI documenta os contratos e seus schemas monetários como decimal strings. Zod continua responsável pela validação em runtime; Swagger não participa do domínio nem das regras financeiras.
+
 ## Money e limites de persistência
 
 Money é representado pelo value object imutável `Money`, implementado internamente com decimal.js. `number` do JavaScript nunca é usado para aritmética monetária. Valores externos são strings decimais com exatamente duas casas; notação científica, valores externos negativos e formatos inválidos são rejeitados. Currency é um código de três letras maiúsculas; operações entre currencies diferentes geram erro de domínio.
@@ -190,10 +192,10 @@ A autenticação de usuários não foi implementada intencionalmente. `Authentic
 
 - **Unitários (`bun test`):** domínio/aplicação e comportamento isolado de adapters; casos dependentes de infraestrutura são ignorados quando não habilitados.
 - **Integração (`bun run test:integration`):** PostgreSQL e LocalStack reais, incluindo constraints, migrations, HTTP, Inbox, Outbox e fluxos financeiros.
-- **Distribuídos (`bun run test:distributed`):** três processos/runtime Bun independentes nos batches relevantes, compartilhando PostgreSQL/LocalStack, mas sem memória JavaScript compartilhada. A suíte observada passou 18 cenários, incluindo 50 BETs idênticas com um débito, BETs concorrentes 80/80 contra saldo 100, hot Wallet, unicidade concorrente de REFUND/ROLLBACK, dois workers de recovery, crashes Inbox entre commit/ACK, crashes Outbox antes/depois do envio e recuperação após recusa de conexão.
+- **Distribuídos (`bun run test:distributed`):** três processos/runtime Bun independentes nos batches relevantes, compartilhando PostgreSQL/LocalStack, mas sem memória JavaScript compartilhada. A suíte observada passou 19 cenários, incluindo 50 BETs idênticas com um débito, BETs concorrentes 80/80 contra saldo 100, hot Wallet, unicidade concorrente de REFUND/ROLLBACK, dois workers de recovery, crashes Inbox entre commit/ACK, crashes Outbox antes/depois do envio e recuperação após recusa de conexão.
 - **Carga (`bun run test:load`):** HTTP real contra PostgreSQL temporário; validação financeira e reconstrução do Ledger após cada workload.
 
-Evidências observadas: `bun test` teve 405 aprovados e 65 testes condicionados à infraestrutura ignorados no modo unitário isolado; integração teve 63 aprovados; distribuídos, 19 cenários; load, 3 workloads. A execução mais recente do acceptance runner agregou regressões, auditorias adversariais e auditorias estáticas em 493/493 verificações, sem falhas e com 2 warnings agregados. O total é agregado pelo runner e não representa 493 novos testes de acceptance. Duas execuções consecutivas anteriores à adição dos testes finais de auth extension e rejected replay registraram 491/491 cada; a execução posterior às adições registrou 493/493. Os resultados são evidência de execuções específicas, não garantias permanentes.
+Evidências observadas: `bun test` teve 406 aprovados e 65 testes condicionados à infraestrutura ignorados no modo unitário isolado; integração teve 63 aprovados; distribuídos, 19 cenários; load, 3 workloads. A execução mais recente do acceptance runner agregou regressões, auditorias adversariais e auditorias estáticas em 493/493 verificações, sem falhas e com 2 warnings agregados. O total é agregado pelo runner e não representa 493 novos testes de acceptance. Duas execuções consecutivas anteriores à adição dos testes finais de auth extension e rejected replay registraram 491/491 cada; a execução posterior às adições registrou 493/493. Os resultados são evidência de execuções específicas, não garantias permanentes.
 
 ### Caracterização do load test
 

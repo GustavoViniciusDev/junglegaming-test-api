@@ -6,6 +6,10 @@ const booleanFromEnvironment = z
   .enum(["true", "false"])
   .default("false")
   .transform((value) => value === "true");
+const swaggerEnabledFromEnvironment = z
+  .enum(["true", "false"])
+  .default("true")
+  .transform((value) => value === "true");
 
 const environmentSchema = z
   .object({
@@ -16,6 +20,7 @@ const environmentSchema = z
     LOG_LEVEL: z
       .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
       .default("info"),
+    SWAGGER_ENABLED: swaggerEnabledFromEnvironment,
     POSTGRES_HOST: nonEmpty,
     POSTGRES_PORT: positiveInteger.max(65535).default(5432),
     POSTGRES_DB: nonEmpty,
