@@ -1,0 +1,10 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.3.11/schema.json",
+  "files": { "ignoreUnknown": true, "includes": ["**", "!dist", "!coverage"] },
+  "formatter": { "indentStyle": "space", "indentWidth": 2 },
+  "javascript": {
+    "parser": { "unsafeParameterDecoratorsEnabled": true },
+    "formatter": { "quoteStyle": "double" }
+  },
+  "linter": { "rules": { "recommended": true } }
+}

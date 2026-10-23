@@ -1,0 +1,96 @@
+services:
+  application:
+    build: .
+    init: true
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-wagering}
+      POSTGRES_USER: ${POSTGRES_USER:-wagering}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-development-only}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      SQS_ENDPOINT: http://localstack:4566
+      SQS_MAX_RECEIVE_COUNT: ${SQS_MAX_RECEIVE_COUNT:-5}
+      SQS_WAGER_TRANSACTION_QUEUE_NAME: wager-transactions.fifo
+      SQS_WAGER_TRANSACTION_DLQ_NAME: wager-transactions-dlq.fifo
+      SQS_WAGER_EVENTS_QUEUE_NAME: wager-events.fifo
+      SQS_CONSUMER_ENABLED: ${SQS_CONSUMER_ENABLED:-true}
+      SQS_CONSUMER_WAIT_TIME_SECONDS: ${SQS_CONSUMER_WAIT_TIME_SECONDS:-20}
+      SQS_CONSUMER_MAX_MESSAGES: ${SQS_CONSUMER_MAX_MESSAGES:-10}
+      SQS_CONSUMER_VISIBILITY_TIMEOUT_SECONDS: ${SQS_CONSUMER_VISIBILITY_TIMEOUT_SECONDS:-60}
+      SQS_CONSUMER_SHUTDOWN_TIMEOUT_MS: ${SQS_CONSUMER_SHUTDOWN_TIMEOUT_MS:-15000}
+      REFERENCE_RETRY_BASE_DELAY_MS: ${REFERENCE_RETRY_BASE_DELAY_MS:-1000}
+      REFERENCE_RETRY_MAX_ATTEMPTS: ${REFERENCE_RETRY_MAX_ATTEMPTS:-8}
+      REFERENCE_RETRY_BATCH_SIZE: ${REFERENCE_RETRY_BATCH_SIZE:-50}
+      REFERENCE_RETRY_POLL_INTERVAL_MS: ${REFERENCE_RETRY_POLL_INTERVAL_MS:-1000}
+      OUTBOX_PUBLISHER_ENABLED: ${OUTBOX_PUBLISHER_ENABLED:-true}
+      OUTBOX_PUBLISHER_BATCH_SIZE: ${OUTBOX_PUBLISHER_BATCH_SIZE:-25}
+      OUTBOX_PUBLISHER_POLL_INTERVAL_MS: ${OUTBOX_PUBLISHER_POLL_INTERVAL_MS:-1000}
+      OUTBOX_PUBLISHER_RETRY_BASE_DELAY_MS: ${OUTBOX_PUBLISHER_RETRY_BASE_DELAY_MS:-1000}
+      OUTBOX_PUBLISHER_RETRY_MAX_DELAY_MS: ${OUTBOX_PUBLISHER_RETRY_MAX_DELAY_MS:-60000}
+      OUTBOX_PUBLISHER_SHUTDOWN_TIMEOUT_MS: ${OUTBOX_PUBLISHER_SHUTDOWN_TIMEOUT_MS:-15000}
+      DEPENDENCY_TIMEOUT_MS: ${DEPENDENCY_TIMEOUT_MS:-3000}
+    ports:
+      - "127.0.0.1:${PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    networks: [backend]
+    stop_grace_period: 20s
+    healthcheck:
+      test: [CMD, bun, -e, "fetch('http://localhost:3000/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 8s
+      retries: 3
+      start_period: 20s
+
+  postgres:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-wagering}
+      POSTGRES_USER: ${POSTGRES_USER:-wagering}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-development-only}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks: [backend]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  localstack:
+    build: ./docker/localstack
+    environment:
+      SERVICES: sqs
+      AWS_DEFAULT_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      SQS_ENDPOINT_STRATEGY: dynamic
+      SQS_MAX_RECEIVE_COUNT: ${SQS_MAX_RECEIVE_COUNT:-5}
+      SQS_CONSUMER_VISIBILITY_TIMEOUT_SECONDS: ${SQS_CONSUMER_VISIBILITY_TIMEOUT_SECONDS:-60}
+    ports:
+      - "127.0.0.1:4566:4566"
+    networks: [backend]
+    healthcheck:
+      test: [CMD-SHELL, 'test -f /tmp/sqs-ready && awslocal sqs list-queues > /dev/null']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  postgres-data:

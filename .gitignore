@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+test-results/
+.snapshot-wagering_test_*.json
+.snapshot-wg_dist_*.json
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+*.log
+*.tsbuildinfo
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db

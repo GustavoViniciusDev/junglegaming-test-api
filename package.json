@@ -1,0 +1,54 @@
+{
+  "name": "distributed-wagering-processor",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "bun@1.4.4",
+  "scripts": {
+    "dev": "bun --watch src/main.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "bun dist/src/main.js",
+    "test": "bun test",
+    "test:integration": "RUN_POSTGRES_INTEGRATION=1 RUN_SQS_INTEGRATION=1 bun test test/postgres.integration.test.ts",
+    "test:distributed": "bun run test/distributed-runner.ts",
+    "test:load": "bun run test/load-runner.ts",
+    "test:acceptance": "bun run test/acceptance-runner.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "migration:create": "bun --bun mikro-orm migration:create",
+    "migration:up": "bun --bun mikro-orm migration:up",
+    "migration:down": "bun --bun mikro-orm migration:down",
+    "migration:list": "bun --bun mikro-orm migration:list"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.922.0",
+    "@mikro-orm/core": "6.6.17",
+    "@mikro-orm/migrations": "6.6.17",
+    "@mikro-orm/postgresql": "6.6.17",
+    "@nestjs/common": "^11.1.8",
+    "@nestjs/core": "^11.1.8",
+    "@nestjs/platform-express": "^11.1.8",
+    "decimal.js": "^10.6.0",
+    "nestjs-pino": "^4.4.1",
+    "pino": "^10.1.0",
+    "pino-http": "^11.0.0",
+    "prom-client": "^15.1.3",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.11",
+    "@mikro-orm/cli": "6.6.17",
+    "@nestjs/testing": "^11.1.8",
+    "@types/bun": "^1.3.3",
+    "typescript": "~5.9.3"
+  },
+  "mikro-orm": {
+    "alwaysAllowTs": true,
+    "useTsNode": false,
+    "configPaths": [
+      "./mikro-orm.config.ts"
+    ]
+  }
+}
